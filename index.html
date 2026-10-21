@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f5ef">
+  <meta name="description" content="函数谜绘：凭一句线索提问、画出函数模型，再用形状与坐标获得反馈的高中函数解谜游戏。">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232f6b55'/%3E%3Cpath d='M12 40c8-22 16-22 24-8s14 10 16-4' fill='none' stroke='%23fffefa' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+  <title>函数谜绘 · 数学模型解谜</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a id="skip-to-board" class="skip-link" href="#drawing-board">跳到画板</a>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="函数谜绘首页">
+        <span class="brand-mark">∿</span>
+        <span><strong>函数谜绘</strong><small>FUNCTION MYSTERY</small></span>
+      </a>
+      <div class="top-meta">
+        <span id="service-pill" class="status-pill"><i></i>本地问答可用</span>
+        <span id="service-help" class="sr-only">示例问题可用</span>
+        <button id="how-header" class="ghost-button how-header" type="button">怎么玩</button><button id="settings-open" class="ghost-button" type="button">设置</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="welcome-screen" class="welcome-screen" hidden>
+        <div class="welcome-copy">
+          <span class="kicker">一张纸 · 一个模型 · 一次次追问</span>
+          <h1>先猜它的性格，<br><em>再把它画出来。</em></h1>
+          <p>从一句线索开始，问出函数的性质，在白板上留下你的判断。画得像不像，答案会告诉你。</p>
+          <div class="welcome-actions">
+            <button id="start-game" class="primary-button" type="button">开始一题 <span>→</span></button>
+            <div class="welcome-links">
+              <button id="levels-open" class="text-button" type="button">选择关卡</button>
+              <button id="how-to-play" class="text-button" type="button">怎么玩？</button>
+              <button id="history-open" class="text-button" type="button">历史成绩</button>
+            </div>
+          </div>
+          <p id="home-status" class="home-status" hidden></p>
+          <p id="welcome-progress" class="welcome-progress"></p>
+          <div class="mini-stats"><span><b>24</b> 个高中模型</span><span><b>3</b> 档难度</span><span><b>∞</b> 可重画</span></div>
+        </div>
+        <div class="welcome-art" aria-hidden="true">
+          <div class="paper-card">
+            <span class="paper-note note-one">左右对称？</span>
+            <span class="paper-note note-two">最低点只有一个</span>
+            <svg viewBox="0 0 440 300" role="presentation">
+              <path class="axis" d="M42 150H400M220 28V274" />
+              <path class="curve" d="M74 54 C132 108 177 150 220 150 C263 150 308 108 366 54" />
+              <circle class="dot" cx="220" cy="150" r="5" />
+            </svg>
+            <span class="paper-caption">一条线索，足够开始。</span>
+          </div>
+          <span class="scribble">x²?</span>
+        </div>
+      </section>
+
+      <section id="game-screen" class="game-screen">
+        <div class="game-header">
+          <div>
+            <button id="round-label" class="kicker round-link" type="button" title="打开关卡列表">第 1 题 · 简单</button>
+            <h1>这条曲线，是什么性格？</h1>
+          </div>
+          <div class="game-header-actions">
+            <div id="timer" class="timer"><span class="timer-dot"></span><strong>不限时</strong></div>
+            <button id="quit-game" class="ghost-button" type="button">返回首页</button>
+          </div>
+        </div>
+
+        <div class="game-grid">
+          <section class="board-column">
+            <div id="first-run-tip" class="first-run-tip" hidden>
+              <span class="first-run-icon" aria-hidden="true">✦</span>
+              <p>第一次来？先问一个“是／不是”的性质，再把曲线画出来。</p>
+              <button id="first-run-how" class="text-button first-run-how" type="button">看看怎么玩</button>
+              <button id="first-run-dismiss" class="tip-close" type="button" aria-label="关闭新手提示">×</button>
+            </div>
+            <div class="clue-strip">
+              <div class="clue-icon">✦</div>
+              <div><span class="eyebrow">开局线索</span><p id="clue-text"></p></div>
+              <span class="clue-count" id="clue-count">0 / 3</span>
+            </div>
+            <div class="canvas-card">
+              <div class="canvas-toolbar">
+                <div class="tool-heading"><span>你的白板</span><small id="canvas-mode-label">空白纸</small></div>
+                <div class="tool-buttons">
+                  <button id="pen" class="tool-button active" title="画笔" aria-label="画笔">✎</button>
+                  <button id="line" class="tool-button" title="拖动绘制直线" aria-label="直线">直线</button>
+                  <button id="curve" class="tool-button" title="绘制后拖动控制点调整曲线" aria-label="曲线">曲线</button>
+                  <button id="circle" class="tool-button" title="辅助圆不参与评分" aria-label="辅助圆">辅助圆</button>
+                  <button id="select" class="tool-button" title="选择、移动或调整图形" aria-label="选择调整">调整</button>
+                  <button id="erase" class="tool-button" title="按对象擦除" aria-label="按对象擦除">⌫</button>
+                  <button id="undo" class="tool-button" title="撤销" aria-label="撤销">↶</button>
+                  <button id="redo" class="tool-button" title="重做" aria-label="重做">↷</button>
+                  <button id="clear" class="tool-button" title="清空" aria-label="清空">×</button>
+                  <button id="grid-toggle" class="tool-button grid-button" title="切换坐标纸" type="button"><span class="grid-icon">▦</span><span>坐标纸</span></button>
+                  <button id="board-focus" class="tool-button focus-button" title="专注画板" aria-label="专注画板" aria-pressed="false">专注</button>
+                </div>
+              </div>
+              <div id="focus-clue" class="focus-clue"></div>
+              <div class="canvas-wrap"><canvas id="drawing-board" width="1000" height="610" tabindex="0" role="application" aria-roledescription="函数绘图板" aria-label="函数绘图白板" aria-describedby="canvas-mode-help keyboard-help"></canvas><div id="canvas-hint" class="canvas-hint">从任意位置开始画，不必一次完成</div><div id="focus-hint" class="focus-hint" aria-hidden="true">双指缩放 · 横屏更宽</div><div id="zoom-status" class="zoom-status" hidden><span id="zoom-level">1×</span><button id="zoom-reset" class="zoom-reset" type="button" aria-label="复位画板视图">复位</button></div></div>
+              <div class="canvas-footer"><span><i class="pen-dot"></i><span id="pen-state">画笔已就绪</span></span><span id="focus-timer" class="focus-timer"></span><span id="stroke-count">0 笔</span></div>
+            </div>
+            <p id="canvas-mode-help" class="board-help"></p>
+            <p id="keyboard-help" class="keyboard-help" hidden>键盘绘图：方向键移动光标 · 空格放置点 · Enter 完成当前图形 · Esc 取消。调整工具下 [ ] 选择图形，方向键移动，Shift+方向键大步移动，Delete 删除。</p>
+            <div id="canvas-status" class="sr-only" role="status" aria-live="polite"></div>
+            <div class="submit-row"><button id="trial-drawing" class="secondary-button" type="button">试评一下</button><button id="submit-drawing" class="primary-button" type="button">交卷揭晓 <span>↗</span></button><button id="reveal-answer" class="text-button" type="button">直接揭晓</button></div>
+          <section id="trial-panel" class="trial-panel" aria-live="polite"><div class="trial-heading"><strong>随画随试</strong><span id="trial-count">0 次试评</span></div><p id="trial-state">试评不限次数，不扣分，也不会揭晓答案。</p><div id="trial-scores" hidden><span>形状 <b id="trial-shape">0</b> / 100</span><span>坐标 <b id="trial-coordinate">+0</b> / 20</span><strong id="trial-total">合计 0 / 120</strong></div><small id="trial-delta"></small></section>
+          </section>
+
+          <aside class="side-column">
+            <section class="panel question-panel">
+              <div class="panel-heading"><div><span class="eyebrow">你可以问</span><h2>只回答 是 或 不是</h2></div><span id="question-count" class="count-badge">0 次</span></div>
+              <div id="suggested-questions" class="suggested-questions"></div>
+              <button id="refresh-questions" class="text-button refresh-questions" type="button">换一组示例</button>
+              <p id="question-cost" class="question-cost"></p>
+              <details id="question-bank"><summary>浏览全部 18 个问题与含义 <small>查看免费</small></summary><div id="question-categories" class="category-tabs" role="group" aria-label="问题分类"></div><div id="bank-questions" class="bank-questions"></div></details>
+              <details id="ai-questions" hidden><summary>自由提问 · 可选 AI</summary><p class="small-note">无需配置即可使用上方问题库；自由输入可能需要 AI。</p><form id="question-form" class="question-form"><input id="question-input" maxlength="160" aria-label="输入一个函数性质问题" autocomplete="off" placeholder="例如：它有渐近线吗？"><button type="submit" aria-label="发送问题">↑</button></form></details>
+              <div id="question-log" class="question-log" aria-live="polite"><div class="empty-log">还没有问题。<br>先从一个性质开始吧。</div></div>
+              <div id="ask-status" class="ask-status" hidden></div>
+            </section>
+            <section class="panel hint-panel"><div class="panel-heading"><div><span class="eyebrow">自动发现</span><h2>线索会自己浮现</h2></div><span id="hint-timer" class="hint-clock">45s</span></div><div id="hint-list" class="hint-list"><div class="hint-locked"><span>◌</span><p>再过一会儿，会出现一个特征。</p></div><div class="hint-locked"><span>◌</span><p>还有两个特征藏在时间里。</p></div><div class="hint-locked"><span>◌</span><p>把它们拼起来。</p></div></div></section>
+            <section class="panel score-panel"><div class="panel-heading"><div><span class="eyebrow">本题记录</span><h2>过程记录</h2></div></div><div class="score-lines"><div><span>不同问题</span><strong id="score-questions">0</strong></div><div><span>已获线索</span><strong id="score-hints">0 / 3</strong></div><div><span>提问节约</span><strong id="process-score">100 / 100</strong></div><div><span>试评次数</span><strong id="process-trials">0</strong></div><div><span>绘图状态</span><strong id="score-drawing">空白</strong></div></div></section>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="settings-dialog" class="modal" aria-labelledby="settings-title"><form method="dialog" id="settings-form"><div class="modal-heading"><div><span class="eyebrow">游戏设置</span><h2 id="settings-title">选择你的节奏</h2></div><button class="close-button" value="cancel" aria-label="关闭">×</button></div><div class="setting-block"><span class="setting-label">随机难度</span><div class="segmented" id="difficulty-options"><button type="button" data-value="easy" class="selected">简单</button><button type="button" data-value="medium">进阶</button><button type="button" data-value="hard">挑战</button></div></div><div class="setting-block"><span class="setting-label">时间</span><div class="segmented" id="time-options"><button type="button" data-value="none" class="selected">不限时</button><button type="button" data-value="60">1 分钟</button><button type="button" data-value="180">3 分钟</button><button type="button" data-value="300">5 分钟</button></div></div><p class="modal-note">限时模式结束时会自动提交当前笔迹。难度用于“随机一题”，挑战关卡难度固定；时间对所有模式生效。保存设置在下一题生效。</p><button id="settings-how" class="text-button settings-how" type="button">怎么玩？</button><button id="reset-progress" class="text-button settings-reset" type="button">清除挑战进度</button><button id="settings-save" class="primary-button full-button" value="default">保存设置（下题生效）</button><button id="new-game" class="secondary-button full-button new-game" type="button">应用并随机一题</button></form></dialog>
+  <dialog id="how-dialog" class="modal" aria-labelledby="how-title"><div class="modal-heading"><div><span class="eyebrow">三步开始</span><h2 id="how-title">把判断画出来</h2></div><button id="how-close" class="close-button" aria-label="关闭">×</button></div><div class="how-steps"><div><b>01</b><p><strong>读线索</strong>先观察它的变化趋势、对称性和特殊点。</p></div><div><b>02</b><p><strong>问问题</strong>点击分类问题库，立即获得“是”或“不是”。前3个不同问题免费，之后每个扣3分解谜分。所有问题都可以离线回答。</p></div><div><b>03</b><p><strong>画模型</strong>用画笔、直线或可调曲线绘制，辅助圆不计分。手机上可双指缩放、拖动查看细节。可以不限次数试评，交卷才揭晓。坐标纸本身不加分。</p></div></div><button id="how-start" class="primary-button full-button">开始试玩</button></dialog>
+
+  <dialog id="result-dialog" class="result-modal" aria-labelledby="result-name" aria-describedby="result-summary result-feedback">
+    <div class="result-top"><span id="result-kicker" class="eyebrow">模型揭晓</span><button id="result-close" class="close-button" aria-label="关闭">×</button></div>
+    <div class="result-title"><div id="result-symbol" class="result-symbol">∿</div><div><h2 id="result-name"></h2><p id="result-formula"></p></div><span id="result-record" class="record-badge" hidden>新纪录</span></div>
+    <p id="result-summary" class="sr-only"></p>
+    <div class="dual-scores"><section><span class="eyebrow">绘图成绩</span><strong id="total-score">0 / 120</strong><small>形状 <b id="shape-score">0</b> / 100 · 坐标 <b id="coordinate-score">+0</b> / 20</small><p id="score-reason"></p></section><section><span class="eyebrow">解谜成绩 · 提问节约</span><strong id="inquiry-score">100 / 100</strong><small id="inquiry-formula"></small></section></div>
+    <p class="score-disclaimer">解谜分只衡量提问成本，绘图分反映模型接近程度；两项不合并，不设通关门槛。</p>
+    <div class="result-canvas-wrap"><canvas id="result-board" width="900" height="360" aria-label="你的绘图与参考曲线对照"></canvas><div class="result-legend"><span><i class="legend-user"></i>你的笔迹</span><label><input id="show-reference" type="checkbox" checked> 显示参考模型</label><span id="comparison-note"></span><div class="share-actions"><button id="share-result" class="text-button share-action" type="button">保存成绩卡</button><button id="copy-level-link" class="text-button share-action" type="button">复制挑战链接</button></div></div></div>
+    <div id="result-feedback" class="feedback-box"></div>
+    <div class="improvement"><strong>可以怎样调整</strong><ul id="result-suggestions"></ul></div>
+    <details id="score-details" class="score-details"><summary>查看评分明细 <span>每一分都有来源</span></summary><div id="score-breakdown"></div><p class="small-note">分项评价几何接近程度，不等同于识别所有数学错误；不单独评价美观。</p></details>
+    <div class="result-stats"><span>用时 <strong id="result-time">0:00</strong></span><span>不同问题 <strong id="result-questions">0</strong></span><span>免费／扣分问题 <strong id="result-question-split">0 / 0</strong></span><span>试评次数 <strong id="result-trials">0</strong></span><span>最终交卷 <strong id="result-submissions">0</strong></span><span>自动线索 <strong id="result-hints">0 / 3</strong></span><span>本关最佳 <strong id="result-best">—</strong></span><span id="result-end-reason"></span></div>
+    <div class="result-actions"><button id="levels-result" class="text-button history-result-link" type="button">关卡列表</button><button id="retry-game" class="secondary-button">再画一次</button><button id="next-game" class="primary-button">下一关 <span>→</span></button></div>
+  </dialog>
+  <dialog id="levels-dialog" class="modal levels-modal" aria-labelledby="levels-title">
+    <div class="levels-body">
+      <div class="modal-heading"><div><span class="eyebrow">挑战进度</span><h2 id="levels-title">选择关卡</h2></div><button id="levels-close" class="close-button" aria-label="关闭">×</button></div>
+      <div id="levels-summary" class="levels-summary"></div>
+      <div class="levels-actions">
+        <button id="levels-history" class="text-button" type="button">历史成绩</button>
+        <button id="levels-random" class="secondary-button" type="button">随机一题</button>
+        <button id="levels-next" class="primary-button" type="button">继续下一关</button>
+      </div>
+      <div id="levels-groups" class="levels-groups"></div>
+    </div>
+  </dialog>
+  <dialog id="reset-dialog" class="modal confirm-modal" aria-labelledby="reset-title" aria-describedby="reset-copy">
+    <div class="confirm-body">
+      <div class="modal-heading"><div><span class="eyebrow">挑战进度</span><h2 id="reset-title">清除本机进度？</h2></div><button id="reset-close" class="close-button" aria-label="关闭">×</button></div>
+      <p id="reset-copy" class="confirm-copy">将清除 24 关的完成状态和最佳成绩。历史成绩不会删除；当前题目也不会结束，之后交卷仍会重新记录进度。</p>
+      <div class="confirm-actions"><button id="reset-cancel" class="secondary-button" type="button">取消</button><button id="reset-confirm" class="danger-button" type="button">清除进度</button></div>
+    </div>
+  </dialog>
+  <dialog id="history-dialog" class="modal history-modal" aria-labelledby="history-title">
+    <div class="history-body">
+      <div class="modal-heading"><div><span class="eyebrow">本地记录</span><h2 id="history-title">历史成绩</h2></div><button id="history-close" class="close-button" aria-label="关闭">×</button></div>
+      <div class="history-filters">
+        <div class="segmented" id="history-difficulty" role="group" aria-label="按难度筛选">
+          <button type="button" data-value="all" class="selected">全部</button>
+          <button type="button" data-value="easy">简单</button>
+          <button type="button" data-value="medium">进阶</button>
+          <button type="button" data-value="hard">挑战</button>
+        </div>
+        <label class="history-select">时间 <select id="history-days"><option value="all">全部</option><option value="7">最近 7 天</option><option value="30">最近 30 天</option></select></label>
+        <label class="history-check"><input id="history-official" type="checkbox"> 仅正式</label>
+      </div>
+      <div id="history-summary" class="history-summary" aria-live="polite"></div>
+      <div id="history-list" class="history-list"></div>
+      <p class="small-note">成绩保存在本浏览器，最多保留 100 条；旧规则成绩不追溯改写。</p>
+    </div>
+  </dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="game.js"></script>
+</body>
+</html>
